@@ -108,10 +108,10 @@ On utilise les deux : à la connexion, le token est écrit dans le localStorage 
 | Connexion réussie | POST | `/api/auth/login` | `{email, password}` (masqué) | 200 | `{token (masqué), user}` | non |
 | Lecture du profil | GET | `/api/users/me` | — | 200 | `{id, name, email, createdAt}` | oui (Bearer, masqué) |
 
-![Connexion refusée](captures/tp1-login-401.png)
+![Connexion refusée](captures/tp1-login-401.PNG)
 
-![Connexion réussie](captures/tp1-login-200.png)
+![Connexion réussie](captures/tp1-login-200.PNG)
 
-![Profil](captures/tp1-users-me.png)
+![Profil](captures/tp1-users-me.PNG)
 
-![Authorization présent (token masqué)](captures/tp1-users-me-authorization.png)
+![Authorization présent (token masqué)](captures/tp1-users-me-authorization.PNG)

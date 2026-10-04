@@ -57,10 +57,10 @@
   - Profil : nom chargé automatiquement ; modification → « Nom mis à jour. » et nom changé dans l'en-tête.
   - Token remplacé par `abc` dans le localStorage + F5 → retour automatique sur `/login`.
 - **Preuves** :
-  - ![Connexion refusée](captures/tp1-login-401.png)
-  - ![Connexion réussie](captures/tp1-login-200.png)
-  - ![Profil](captures/tp1-users-me.png)
-  - ![Authorization présent](captures/tp1-users-me-authorization.png)
+  - ![Connexion refusée](captures/tp1-login-401.PNG)
+  - ![Connexion réussie](captures/tp1-login-200.PNG)
+  - ![Profil](captures/tp1-users-me.PNG)
+  - ![Authorization présent](captures/tp1-users-me-authorization.PNG)
 - **Ce que je sais maintenant expliquer sans l'agent** :
   - le trajet d'une requête de connexion : composant → service → HttpClient → intercepteur → proxy → Express → MongoDB ;
   - le rôle de l'intercepteur (ajout du `Bearer` et gestion du 401) et du guard (protection des routes) ;
