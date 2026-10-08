@@ -67,3 +67,58 @@
   - pourquoi `tap()` dans le service : mémoriser token et utilisateur sans bloquer la réponse ;
   - la différence entre Signal (réactif, en mémoire) et localStorage (persistant, non réactif) ;
   - pourquoi le composant ne fait jamais d'appel HTTP directement.
+
+---
+
+# Rapport d'usage de l'IA - TP2
+
+## Préparation
+
+- **Objectif** : relancer backend et frontend.
+- **Problème rencontré** : PowerShell bloquait encore `npm` → réglé définitivement avec `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`.
+- **Vérification** : « Connecté à MongoDB Atlas », connexion avec le compte démo, page Backing tracks affichée.
+
+## Mission 2 — Bibliothèque paginée
+
+- **Objectif** : pagination côté serveur avec `GET /api/tracks?page=…&limit=…`, état en Signals, `@for` / `@empty` / `@if`, boutons Précédent / Suivant désactivés aux bornes.
+- **Prompt principal** : « On commence le TP2, étape par étape. » — avec comme contexte fourni à l'agent : le projet complet (archive du dépôt), le sujet `SUJET_ETUDIANT_TP2.md`, `API_CONTRACT.md` et les consignes `AGENTS.md` / `best-practices.md`. Consigne donnée : avancer une étape à la fois, m'expliquer chaque fichier avant que je le modifie, et ne pas toucher au backend.
+- **Plan proposé par l'agent** : vérifier que `TrackService.list(page, limit)` transmet bien `page` et `limit`, puis ajouter dans le composant les Signals `tracks`, `page`, `pages`, `total`, `limit`, `loading`, `error`, une nouvelle requête à chaque changement de page et un choix « par page » (2 / 5 / 10) pour tester la pagination avec peu de pistes.
+- **Vérifications** : avec « 2 par page » et 3 pistes → « Page 1 / 2 » puis « Page 2 / 2 » ; dans Network, `tracks?page=1&limit=2` puis `tracks?page=2&limit=2` ; Précédent grisé en page 1, Suivant grisé en dernière page.
+- **Proposition écartée** : récupérer toutes les pistes puis les découper dans Angular (interdit par le sujet). Les options avancées (Angular Material Paginator, plugin `aggregate-paginate-v2`) n'ont pas été réalisées.
+- **Fichiers modifiés** : `shared/services/track.service.ts`, `components/tracks-page/tracks-page.ts` et `.html`.
+- **Preuve** : ![Pagination](captures/tp2-pagination.PNG)
+
+## Mission 3 — Upload et lecture audio
+
+- **Objectif** : analyser le flux existant, valider le fichier côté front, gérer l'état pendant l'envoi, cards accessibles, lecteur avec morceau en cours, erreur audio et révocation de l'ObjectURL.
+- **Prompt principal** : suite de la même conversation (« étape suivante ») ; l'agent s'appuyait sur la Mission 3 du sujet. Mes demandes de précision pendant le travail : où trouver les éléments dans la page, que mettre dans les captures sans montrer le token, comment prouver la suppression.
+- **Plan proposé par l'agent** :
+  1. `track.service.ts` : commentaires sur `FormData` (`audio`, `title`) et `responseType: 'blob'`, ajout de `remove()` (bonus suppression).
+  2. `tracks-page.ts` : validation (mêmes types MIME et même limite de 25 Mo que le backend), Signals `uploading` / `uploadError` / `uploadSuccess`, formulaire vidé et retour page 1 après succès, `playing`, `audioError`, révocation de l'URL dans `DestroyRef.onDestroy`, formatage de la taille, du format et de la date.
+  3. `tracks-page.html` : cards, messages, lecteur avec `(error)`, boutons avec `aria-label`.
+  4. `tracks-page.css` : grille responsive de cards, focus visible au clavier.
+- **Propositions écartées** : mettre directement l'URL de l'API dans `<audio src>` (pas de header `Authorization` → 401) ; réimplémenter l'upload ou modifier le backend (interdit par le sujet : on complète seulement le frontend).
+- **Point d'attention** : la taille était affichée « 3605337 Ko » alors que le backend renvoie des **octets** → corrigé avec `formatSize()` (« 3,4 Mo »).
+- **Fichiers modifiés** (backend non modifié, contrat HTTP inchangé) :
+  - `frontend-starter/src/app/shared/services/track.service.ts`
+  - `frontend-starter/src/app/components/tracks-page/tracks-page.ts`
+  - `frontend-starter/src/app/components/tracks-page/tracks-page.html`
+  - `frontend-starter/src/app/components/tracks-page/tracks-page.css`
+- **Tests réalisés** :
+  - Fichier `README.md` choisi → « Format non accepté (text/markdown) », bouton Envoyer grisé, aucune requête dans Network.
+  - Upload de `song1.mp3` avec le titre « Morceau 3 » → « Envoi en cours… », message de succès, formulaire vidé, Mes pistes (3), `POST /api/tracks` en multipart (`audio` + `title`) → 201.
+  - Lecture → `GET /api/tracks/:id/audio` → 200, lecteur, « En cours : … », card mise en évidence.
+  - Suppression de « Morceau 3 » avec confirmation → requête DELETE, Mes pistes (2), liste rechargée.
+- **Preuves** :
+  - ![Validation front](captures/tp2-validation-front.PNG)
+  - ![Upload](captures/tp2-upload.PNG)
+  - ![Pagination](captures/tp2-pagination.PNG)
+  - ![Lecture audio](captures/tp2-lecture-audio.PNG)
+  - ![Suppression](captures/tp2-suppression.PNG)
+- **Ce que je sais maintenant expliquer sans l'agent** :
+  - pourquoi la pagination doit être faite par le serveur (une requête par page, pas de découpe locale) ;
+  - le rôle du `FormData` et pourquoi les champs doivent s'appeler `audio` et `title` ;
+  - pourquoi `<audio src="/api/…">` ne fonctionne pas avec un JWT, et le trajet `Blob` → `ObjectURL` → lecteur ;
+  - pourquoi il faut révoquer l'ObjectURL (fuite mémoire) ;
+  - pourquoi la validation front ne remplace pas la validation back ;
+  - la différence entre téléchargement complet d'un Blob, buffering du navigateur et streaming serveur.
