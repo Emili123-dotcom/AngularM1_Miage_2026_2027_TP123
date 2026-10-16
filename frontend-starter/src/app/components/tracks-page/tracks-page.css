@@ -50,3 +50,7 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px s
 .empty { color: #61756f; }
 .now-playing { margin: 0.5rem 0; }
 .success { color: #1d755e; }
+
+/* Mission 6 : barre de progression de l'upload */
+.upload-progress { display: flex; align-items: center; gap: 0.6rem; margin-top: 0.8rem; }
+.upload-progress progress { flex: 1; height: 0.8rem; accent-color: #1d755e; }

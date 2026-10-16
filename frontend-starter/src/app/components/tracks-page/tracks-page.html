@@ -15,11 +15,25 @@
       </label>
       <label>
         Fichier audio (MP3, WAV, OGG, M4A — 25 Mo max)
-        <input #fileInput type="file" accept=".mp3,.wav,.ogg,.m4a,audio/*" (change)="choose($event)" />
+        <input #fileInput type="file" accept=".mp3,.wav,.ogg,.m4a,audio/*" (change)="choose($event)"
+          [disabled]="uploading()" />
       </label>
       <button type="button" (click)="upload(fileInput)" [disabled]="!file() || uploading() || !!uploadError()">
         {{ uploading() ? 'Envoi en cours…' : 'Envoyer' }}
       </button>
+
+      <!-- Mission 6 : état de l'upload (idle / uploading / success / error) -->
+      @switch (uploadState()) {
+        @case ('uploading') {
+          <div class="upload-progress" role="status">
+            <progress max="100" [value]="progress()" aria-label="Progression de l'envoi"></progress>
+            <span>{{ progress() }} %</span>
+          </div>
+        }
+        @case ('error') {
+          <p class="error" role="alert">Échec de l’envoi.</p>
+        }
+      }
 
       @if (uploadError()) {
         <p class="error" role="alert">{{ uploadError() }}</p>
@@ -70,7 +84,10 @@
                 {{ loadingAudioId() === track.id ? '…' : '▶' }}
               </button>
               <button type="button" class="danger" (click)="remove(track)"
-                [attr.aria-label]="'Supprimer ' + track.title">🗑</button>
+                [disabled]="deletingId() === track.id"
+                [attr.aria-label]="'Supprimer ' + track.title">
+                {{ deletingId() === track.id ? '…' : '🗑 Supprimer' }}
+              </button>
             </div>
           </li>
         } @empty {

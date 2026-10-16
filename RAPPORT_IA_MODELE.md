@@ -22,7 +22,7 @@
 ## Mission 0 — Cartographie
 
 - **Objectif** : repérer composant racine, routes, HttpClient, modèles/services/pages, intercepteur JWT.
-- **Prompt principal** : « aide-moi à faire le TP1 étape par étape ».
+- **Prompt principal** : « Voici le projet et le sujet du TP1. Guide-moi étape par étape pour repérer le composant racine, les routes, l'enregistrement de HttpClient, les services et l'intercepteur JWT, puis pour schématiser le flux de connexion. Je veux comprendre le rôle de chaque fichier. »
 - **Plan proposé par l'agent** : lire `main.ts`, puis `routes.ts`, puis `shared/` (services, intercepteur, guard), puis écrire la cartographie et le schéma du flux de connexion.
 - **Vérifications** : j'ai ouvert chaque fichier cité ; j'ai testé la redirection d'une adresse inconnue vers `/tracks` (route `**`).
 - **Résultat** : voir [TP1_REPONSES.md](TP1_REPONSES.md).
@@ -30,6 +30,7 @@
 ## Mission 1 — Inscription, connexion et profil
 
 - **Objectif** : formulaires réactifs validés, appels register/login, stockage du JWT, Signal `currentUser`, redirections, déconnexion, profil, gestion du 401.
+- **Prompt principal** : « Aide-moi à compléter l'inscription, la connexion et le profil avec des formulaires réactifs validés comme le backend. Tous les appels HTTP doivent rester dans `AuthService`, le JWT ne doit jamais apparaître dans la console, et un 401 doit renvoyer vers `/login`. On avance un fichier à la fois et je teste avant de passer au suivant. »
 - **Plan proposé par l'agent** (une étape = un fichier, testée avant de passer à la suivante) :
   1. `shared/utils/http-error-message.ts` (nouveau) : transformer une erreur HTTP en message lisible.
   2. `AuthService` : ajout de `isAuthenticated` (`computed`) et redirection vers `/login` dans `logout()`.
@@ -81,7 +82,8 @@
 ## Mission 2 — Bibliothèque paginée
 
 - **Objectif** : pagination côté serveur avec `GET /api/tracks?page=…&limit=…`, état en Signals, `@for` / `@empty` / `@if`, boutons Précédent / Suivant désactivés aux bornes.
-- **Prompt principal** : « On commence le TP2, étape par étape. » — avec comme contexte fourni à l'agent : le projet complet (archive du dépôt), le sujet `SUJET_ETUDIANT_TP2.md`, `API_CONTRACT.md` et les consignes `AGENTS.md` / `best-practices.md`. Consigne donnée : avancer une étape à la fois, m'expliquer chaque fichier avant que je le modifie, et ne pas toucher au backend.
+- **Prompt principal** : « Voici le sujet du TP2 et `API_CONTRACT.md`. Aide-moi à mettre en place une pagination côté serveur : une nouvelle requête `GET /api/tracks?page=…&limit=…` à chaque changement de page, un état géré avec des Signals et des boutons désactivés aux bornes. Explique-moi chaque fichier avant que je le modifie, et sans toucher au backend. »
+- **Contexte fourni à l'agent** : le projet complet (archive du dépôt), `SUJET_ETUDIANT_TP2.md`, `API_CONTRACT.md` et les consignes `AGENTS.md` / `best-practices.md`.
 - **Plan proposé par l'agent** : vérifier que `TrackService.list(page, limit)` transmet bien `page` et `limit`, puis ajouter dans le composant les Signals `tracks`, `page`, `pages`, `total`, `limit`, `loading`, `error`, une nouvelle requête à chaque changement de page et un choix « par page » (2 / 5 / 10) pour tester la pagination avec peu de pistes.
 - **Vérifications** : avec « 2 par page » et 3 pistes → « Page 1 / 2 » puis « Page 2 / 2 » ; dans Network, `tracks?page=1&limit=2` puis `tracks?page=2&limit=2` ; Précédent grisé en page 1, Suivant grisé en dernière page.
 - **Proposition écartée** : récupérer toutes les pistes puis les découper dans Angular (interdit par le sujet). Les options avancées (Angular Material Paginator, plugin `aggregate-paginate-v2`) n'ont pas été réalisées.
@@ -91,7 +93,7 @@
 ## Mission 3 — Upload et lecture audio
 
 - **Objectif** : analyser le flux existant, valider le fichier côté front, gérer l'état pendant l'envoi, cards accessibles, lecteur avec morceau en cours, erreur audio et révocation de l'ObjectURL.
-- **Prompt principal** : suite de la même conversation (« étape suivante ») ; l'agent s'appuyait sur la Mission 3 du sujet. Mes demandes de précision pendant le travail : où trouver les éléments dans la page, que mettre dans les captures sans montrer le token, comment prouver la suppression.
+- **Prompt principal** : « Explique-moi le flux d'upload (`FormData`) et de lecture (`Blob` → `ObjectURL`), puis aide-moi à ajouter une validation du fichier identique à celle du backend, un état pendant l'envoi, des cards accessibles et un lecteur qui gère les erreurs et libère la mémoire. Indique-moi aussi quoi capturer dans Network sans montrer le token. »
 - **Plan proposé par l'agent** :
   1. `track.service.ts` : commentaires sur `FormData` (`audio`, `title`) et `responseType: 'blob'`, ajout de `remove()` (bonus suppression).
   2. `tracks-page.ts` : validation (mêmes types MIME et même limite de 25 Mo que le backend), Signals `uploading` / `uploadError` / `uploadSuccess`, formulaire vidé et retour page 1 après succès, `playing`, `audioError`, révocation de l'URL dans `DestroyRef.onDestroy`, formatage de la taille, du format et de la date.
@@ -122,3 +124,54 @@
   - pourquoi il faut révoquer l'ObjectURL (fuite mémoire) ;
   - pourquoi la validation front ne remplace pas la validation back ;
   - la différence entre téléchargement complet d'un Blob, buffering du navigateur et streaming serveur.
+
+---
+
+# Rapport d'usage de l'IA - TP3
+
+## Préparation
+
+- **Objectif** : installer ce qui manquait pour les missions du TP3.
+- **Ce que j'ai fait** : installation d'Angular Material (`@angular/material`, `@angular/cdk`) pour le SnackBar demandé, et de `jsdom` pour les tests ; ajout du thème Material dans `styles.css`.
+- **Problème rencontré** : `ng test` refusait de démarrer (configuration « development » introuvable) → ajout de l'option `buildTarget` dans la cible `test` de `angular.json`.
+
+## Mission 5 — Suppression d'une piste
+
+- **Objectif** : bouton « Supprimer » dans chaque card, confirmation, anti double clic, message SnackBar, rechargement de la liste, gestion du 404.
+- **Prompt principal** : « Voici le sujet du TP3. Aide-moi à ajouter la suppression d'une piste en passant par `TrackService`, avec une confirmation, un blocage du double clic, un message SnackBar et la gestion du cas 404. Explique chaque étape pour que je puisse la refaire. »
+- **Plan proposé par l'agent** : `TrackService.remove()` → `DELETE /api/tracks/:id` ; dans le composant, `confirm()`, Signal `deletingId`, `MatSnackBar`, `load()` après suppression, cas 404 traité à part.
+- **Erreur corrigée** : le 404 était d'abord écrit avec `console.error` ; changé en `console.warn`, car c'est un cas prévu et pas un bug.
+- **Fichiers modifiés** : `track.service.ts`, `tracks-page.ts`, `tracks-page.html`, `tracks-page.css`, `styles.css`, `package.json`. Backend non modifié.
+- **Vérifications** : suppression testée dans le navigateur (SnackBar visible) ; Network : `DELETE` → `204 No Content`, pas de JWT visible.
+- **Preuves** :
+  - ![Suppression + SnackBar](captures/tp3-suppression.png)
+  - ![Network DELETE 204](captures/tp3-network-delete.PNG)
+
+## Mission 6 — Progression de l'upload
+
+- **Objectif** : afficher un pourcentage et gérer 4 états (aucun envoi, en cours, réussi, échec), contrôles désactivés pendant l'envoi.
+- **Prompt principal** : « Comment afficher la progression d'un upload avec HttpClient ? Je veux distinguer les états aucun envoi / en cours / réussi / échec et bloquer le formulaire pendant l'envoi. »
+- **Plan proposé par l'agent** : `reportProgress: true` + `observe: 'events'` dans le service ; Signals `uploadState` et `progress` ; calcul `100 * loaded / total` ; `<progress>` dans le template.
+- **Problème rencontré** : avec la limitation « 3G » de Chrome, la barre restait à 0 %. La capture montre donc l'état « en cours », et le pourcentage est prouvé par un test automatisé.
+- **Fichiers modifiés** : `track.service.ts`, `tracks-page.ts`, `tracks-page.html`, `tracks-page.css`.
+- **Preuves** :
+  - ![Upload terminé](captures/tp3-upload.PNG)
+  - ![Upload en cours](captures/tp3-upload-progression.PNG)
+
+## Mission 7 — Tests automatisés
+
+- **Objectif** : au moins 3 tests frontend, sans backend ni MongoDB.
+- **Prompt principal** : « Aide-moi à écrire au moins trois tests frontend qui vérifient les URL, les méthodes et les headers, avec des réponses HTTP simulées, sans dépendre du backend ni de MongoDB. »
+- **Plan proposé par l'agent** : 5 fichiers de tests avec `HttpTestingController` (service des pistes, connexion, intercepteur, guard, composant).
+- **Fichiers créés** : `track.service.spec.ts`, `auth.service.spec.ts`, `auth.interceptor.spec.ts`, `auth.guard.spec.ts`, `tracks-page.spec.ts`.
+- **Vérifications** : `npm test` frontend → 5 fichiers, 12 tests réussis ; `npm test` backend → 2 tests réussis ; `npm run build` sans erreur.
+- **Preuves** (tableau des résultats attendus / observés dans [TP3_REPONSES.md](TP3_REPONSES.md)) :
+  - ![Tests frontend](captures/tp3-tests.PNG)
+  - ![Build](captures/tp3-build.PNG)
+- **Ce que je sais maintenant expliquer sans l'agent** :
+  - pourquoi la suppression passe par `TrackService` et pas directement par `HttpClient` dans le composant ;
+  - comment le backend protège la suppression (JWT + `ownerId`, réponse 404 sinon) ;
+  - comment Angular calcule le pourcentage d'upload (`loaded / total`) ;
+  - pourquoi les tests HTTP n'ont pas besoin de MongoDB (`HttpTestingController` + `flush()`) ;
+  - ce que vérifient les tests d'intercepteur et de guard ;
+  - la différence entre un test unitaire et un test d'intégration.
